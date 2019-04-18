@@ -17,7 +17,7 @@ var client          =     redis.createClient();
 
 //var nodemailer = require('nodemailer');
 // var cors = require('cors');
-// app.use(cors);
+// app.use(cors);nnnk
 var {user_login} = require('./tables/user_login')
 var {question} = require('./tables/question')    
 var app = express();
