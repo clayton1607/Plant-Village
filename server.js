@@ -272,7 +272,9 @@ res.redirect('back');
 });
 
 
-
+app.get("/",(req,res)=>{
+  res.send("yess")
+})
 
 app.post('/donate',(req,res)=>{
     console.log(req.body);
