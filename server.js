@@ -59,8 +59,8 @@ app.post('/login',function(req,res){
       }
       else{
           if (result.rows.length!=0){
-            req.session.key=req.body.email;
-            console.log(req.session)
+            //req.session.key=req.body.email;
+            //console.log(req.session)
             res.end('done');
           }
           else{
