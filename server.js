@@ -38,6 +38,10 @@ app.use(session({
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
+app.get('/test', (req , res)=>{
+  res.send({msg : "hello world"})
+})
+
 app.get('/',function(req,res){  
   // create new session object.
   if(req.session.key) {
@@ -389,7 +393,7 @@ app.get('/queries',(req,res)=>{
 // });
 
 // app.listen(3000);
-app.listen(process.env.PORT);
+app.listen(port);
 
 
 
