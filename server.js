@@ -46,13 +46,7 @@ app.get('/test', (req , res)=>{
 
 app.get('/',function(req,res){  
   // create new session object.
-  if(req.session.key) {
-      // if email key is sent redirect.
-      res.redirect('/admin');
-  } else {
-      // else go to home page.
-      res.send('Hello')
-  }
+  res.send('Hello there Welcome here!!!');
 });
 
 app.post('/login',function(req,res){
