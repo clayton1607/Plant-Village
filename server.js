@@ -21,10 +21,13 @@ var client          =     redis.createClient();
 var {user_login} = require('./tables/user_login')
 var {question} = require('./tables/question')    
 var app = express();
+
 app.use(express.static(__dirname+'/Public'));
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 console.log(__dirname+'/Public');
 app.set('view engine','hbs');
+
 app.get('/hello',(req,res)=>{
   res.send("hello");
 });
@@ -35,8 +38,7 @@ app.use(session({
   saveUninitialized: false,
   resave: false
 }));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
+
 
 app.get('/',function(req,res){  
   // create new session object.
@@ -45,19 +47,20 @@ app.get('/',function(req,res){
       res.redirect('/admin');
   } else {
       // else go to home page.
-      res.render('index.html');
+      res.send('Hello')
   }
 });
 
 app.post('/login',function(req,res){
-  let stmt = 'SELECT * from user_login where user_email=? and user_password=?';
-  user_login.query(stmt,[req.body.email,req.body.password],function(err, result){
-    console.log(result)
+  console.log(req.body)
+  let stmt = 'SELECT * from user_login where user_email=$1 and user_password=$2';
+  user_login.query(stmt,[req.body.email,req.body.password],function(err,result){
+    console.log(result.rows.length)
     if(err){
         console.log(err);
       }
       else{
-          if (result.length!=0){
+          if (result.rows.length!=0){
             req.session.key=req.body.email;
             console.log(req.session)
             res.end('done');
@@ -74,20 +77,23 @@ app.post('/login',function(req,res){
 });
 });
 app.post('/register',(req,res)=>{
-  let stmt='SELECT * from user_login where user_email=? or username=?';
-  user_login.query(stmt,[req.body.email,req.body.username],(err,result)=>{
-    if (result.length!=0){
+  console.log(req.body.email)
+  let stmt='SELECT * from user_login where user_email=$1 or user_password=$2';
+  user_login.query(stmt,[req.body.email,req.body.password],(err,result)=>{
+    console.log(result.rows.length);
+    if (result.rows.length!=0){
       res.json({"error" : true,
       "message" : "This email is already present"});
     }
     else{
       var d= new Date();
-      stmt='INSERT into user_login(user_email,user_password,username,ddate) VALUES (?,?,?,?)'
+      console.log(req.body)
+      stmt='INSERT into user_login(user_email,user_password,user_name,ddate) VALUES ($1,$2,$3,$4) RETURNING *'
       user_login.query(stmt,[req.body.email,req.body.password,req.body.username,d],(err,result)=>{
         if(err){
           res.json({
             "error" : true ,
-           "message" : "Error while adding user."});
+           "message" : err});
         }
         else{
           res.json({
@@ -105,7 +111,7 @@ app.get('/logout',function(req,res){
           console.log(err);
       } else {
           res.redirect('/');
-      }
+      } 
   });
 });
 
@@ -118,6 +124,147 @@ app.get('/queries',(req,res)=>{
   res.send("HELLO");
 })
 
+const multer = require("multer");
+
+const handleError = (err, res) => {
+    res.status(500)
+    res.contentType("text/plain")
+    res.end("Oops! Something went wrong!");
+};
+const upload = multer({
+  dest: "/uploads"
+  // you might also want to set some limits: https://github.com/expressjs/multer#limits
+});
+app.post("/upload",upload.single("file" /* name attribute of <file> element in your form */),(req, res) => {
+    var questionp= req.body.yourq; //question that is asked
+          var type= req.body.type; //type of question
+          var name= req.body.name; //who asked the question
+          //id of the question will be on auto increment in database
+      var q = [questionp] //for second query
+    console.log(req.file)
+    console.log(req.file.path);
+    const tempPath = req.file.path;
+    var image=Math.floor(100000 + Math.random() * 900000);
+    var img=image.toString();
+    var png ="image.png";
+    var image_png=img.concat(png);
+    const targetPath = path.join(__dirname, "public/uploads",image_png);
+    console.log("IM here");
+    console.log(tempPath);
+    console.log("IM here");
+    console.log(targetPath);
+    var values1 = [questionp,name,type,targetPath];
+
+    if (path.extname(req.file.originalname).toLowerCase() === ".png") {
+      fs.rename(tempPath, targetPath, err => {
+        if (err) return handleError(err, res);
+           res.status(200)
+          res.contentType("text/plain")
+          // res.send("File uploaded!");
+          
+          question.query('insert into q2table (questions,quser,type,image_path) values ($1,$2,$3,$4)',values1,(err,row)=>{
+            if(err) throw err;
+       
+            question.query('select qno from q2table where questions= $1',questionp,(err,result)=>{
+              if(err) throw err;
+              var values2 = [result.rows[0].qno,"This Discussion is ready","Admin","default"];
+              question.query('insert into anstable (qno,answer,usera,type) values ($1,$2,$3,$4)',values2,(err,rows)=>{
+                if(err) throw err;
+                res.send('question is added');
+              });
+            });
+       
+       
+       
+       
+          });
+      });
+    } else {
+      fs.unlink(tempPath, err => {
+        if (err) return handleError(err, res);
+
+        res
+          .status(403)
+          .contentType("text/plain")
+          .end("Only .png files are allowed!");
+      });
+    }
+  }
+);
+
+app.post('/reply2',(req,res)=>{
+  var replystring= req.body.replyf;
+  var qno= req.body.questno;
+  var type=req.body.questtype;
+  var name=req.body.username;
+  
+
+  var values = [qno,replystring,name,type];
+  question.query('insert into ans3table (qno,answer,usera,type) values ($1,$2,$3,$4) RETURNING *',values,(err,rows)=>{
+     if(err) throw err;
+        
+        
+
+        res.send('new reply added to qno 1');
+     });
+
+
+ });
+
+// route for getting answers of a particular question using its question id
+ app.get('/listans',(req,res,err)=>{
+
+          var askno=[req.query.quno];
+        
+
+        
+        
+       
+        question.query('select * from ans3table where qno= $1',askno,(err,result)=>{
+           if(err) throw err;
+           // res.render('./general_forum.hbs',{quest: rows.questions});
+        
+           var count;
+           var list1=[];
+           var lengthr=result.rows.length;
+          //  console.log(lengthr+"length");
+           for(count=0;count<lengthr;count++){
+        
+             var ask = {
+                          'qno':result.rows[count].qno,
+                          'ansno':result.rows[count].ansno,
+                          'answer':result.rows[count].answer,
+                          'usera':result.rows[count].usera,
+                          'type':result.rows[count].type,
+                          'upvotes':result.rows[count].upvotes,
+                          'downvotes':result.rows[count].downvotes,
+                          
+                      }
+        
+                    list1.push(ask);
+                      // console.log(list1);
+           }
+        
+           function compare(a, b) {
+           
+            
+              console.log(a.upvotes);
+              console.log(b.upvotes);
+            
+            const upA = a.upvotes;
+            const upB = b.upvotes;
+            
+           return upB - upA;
+          }
+          
+          console.log(list1.sort(compare));
+          res.send({list1});
+         }); 
+         
+         
+          
+         
+});
 
 // //route to ask a new question
 // app.post('/askquest',(req,res)=>{
