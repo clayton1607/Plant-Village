@@ -40,6 +40,10 @@ app.use(session({
 }));
 
 
+app.get('/test', (req , res)=>{
+  res.send({msg : "hello world"})
+})
+
 app.get('/',function(req,res){  
   // create new session object.
   if(req.session.key) {
@@ -536,7 +540,7 @@ app.post('/reply2',(req,res)=>{
 // });
 
 // app.listen(3000);
-app.listen(process.env.PORT);
+app.listen(port);
 
 
 
