@@ -52,7 +52,7 @@ app.get('/',function(req,res){
 app.post('/login',function(req,res){
   let stmt = 'SELECT * from user_login where user_email=? and user_password=?';
   user_login.query(stmt,[req.body.email,req.body.password],function(err, result){
-    console.log(result.length)
+    console.log(result)
     if(err){
         console.log(err);
       }
@@ -111,12 +111,12 @@ app.get('/logout',function(req,res){
 
 //Plant MiniProject 
 
-// app.get('/search-query',(req,res)=>{
-//   console.log(req.session)
-// })
-// app.get('/queries',(req,res)=>{
-//   res.send();
-// })
+app.get('/search-query',(req,res)=>{
+  console.log(req.session)
+})
+app.get('/queries',(req,res)=>{
+  res.send("HELLO");
+})
 
 
 // //route to ask a new question
@@ -388,7 +388,9 @@ app.get('/logout',function(req,res){
 // });
 // });
 
+// app.listen(3000);
 app.listen(process.env.PORT);
+
 
 
 
