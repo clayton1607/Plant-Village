@@ -129,66 +129,66 @@ const handleError = (err, res) => {
     res.contentType("text/plain")
     res.end("Oops! Something went wrong!");
 };
-const upload = multer({
-  dest: "/uploads"
-  // you might also want to set some limits: https://github.com/expressjs/multer#limits
-});
-app.post("/upload",upload.single("file" /* name attribute of <file> element in your form */),(req, res) => {
-    var questionp= req.body.yourq; //question that is asked
-          var type= req.body.type; //type of question
-          var name= req.body.name; //who asked the question
-          //id of the question will be on auto increment in database
-      var q = [questionp] //for second query
-    console.log(req.file)
-    console.log(req.file.path);
-    const tempPath = req.file.path;
-    var image=Math.floor(100000 + Math.random() * 900000);
-    var img=image.toString();
-    var png ="image.png";
-    var image_png=img.concat(png);
-    const targetPath = path.join(__dirname, "public/uploads",image_png);
-    console.log("IM here");
-    console.log(tempPath);
-    console.log("IM here");
-    console.log(targetPath);
-    var values1 = [questionp,name,type,targetPath];
+// const upload = multer({
+//   dest: "/uploads"
+//   // you might also want to set some limits: https://github.com/expressjs/multer#limits
+// });
+// app.post("/upload",upload.single("file" /* name attribute of <file> element in your form */),(req, res) => {
+//     var questionp= req.body.yourq; //question that is asked
+//           var type= req.body.type; //type of question
+//           var name= req.body.name; //who asked the question
+//           //id of the question will be on auto increment in database
+//       var q = [questionp] //for second query
+//     console.log(req.file)
+//     console.log(req.file.path);
+//     const tempPath = req.file.path;
+//     var image=Math.floor(100000 + Math.random() * 900000);
+//     var img=image.toString();
+//     var png ="image.png";
+//     var image_png=img.concat(png);
+//     const targetPath = path.join(__dirname, "public/uploads",image_png);
+//     console.log("IM here");
+//     console.log(tempPath);
+//     console.log("IM here");
+//     console.log(targetPath);
+//     var values1 = [questionp,name,type,targetPath];
 
-    if (path.extname(req.file.originalname).toLowerCase() === ".png") {
-      fs.rename(tempPath, targetPath, err => {
-        if (err) return handleError(err, res);
-           res.status(200)
-          res.contentType("text/plain")
-          // res.send("File uploaded!");
+//     if (path.extname(req.file.originalname).toLowerCase() === ".png") {
+//       fs.rename(tempPath, targetPath, err => {
+//         if (err) return handleError(err, res);
+//            res.status(200)
+//           res.contentType("text/plain")
+//           // res.send("File uploaded!");
           
-          question.query('insert into q2table (questions,quser,type,image_path) values ($1,$2,$3,$4)',values1,(err,row)=>{
-            if(err) throw err;
+//           question.query('insert into q2table (questions,quser,type,image_path) values ($1,$2,$3,$4)',values1,(err,row)=>{
+//             if(err) throw err;
        
-            question.query('select qno from q2table where questions= $1',questionp,(err,result)=>{
-              if(err) throw err;
-              var values2 = [result.rows[0].qno,"This Discussion is ready","Admin","default"];
-              question.query('insert into anstable (qno,answer,usera,type) values ($1,$2,$3,$4)',values2,(err,rows)=>{
-                if(err) throw err;
-                res.send('question is added');
-              });
-            });
-       
-       
+//             question.query('select qno from q2table where questions= $1',questionp,(err,result)=>{
+//               if(err) throw err;
+//               var values2 = [result.rows[0].qno,"This Discussion is ready","Admin","default"];
+//               question.query('insert into anstable (qno,answer,usera,type) values ($1,$2,$3,$4)',values2,(err,rows)=>{
+//                 if(err) throw err;
+//                 res.send('question is added');
+//               });
+//             });
        
        
-          });
-      });
-    } else {
-      fs.unlink(tempPath, err => {
-        if (err) return handleError(err, res);
+       
+       
+//           });
+//       });
+//     } else {
+//       fs.unlink(tempPath, err => {
+//         if (err) return handleError(err, res);
 
-        res
-          .status(403)
-          .contentType("text/plain")
-          .end("Only .png files are allowed!");
-      });
-    }
-  }
-);
+//         res
+//           .status(403)
+//           .contentType("text/plain")
+//           .end("Only .png files are allowed!");
+//       });
+//     }
+//   }
+// );
 
 app.post('/reply2',(req,res)=>{
   var replystring= req.body.replyf;
