@@ -133,7 +133,32 @@ app.post("/askqts",(req, res) => {
     });
   });
 
-
+app.get('/upvoteReply',(req,res)=>{
+  var upvotes=req.query.upvotes;
+  if (upvotes==null){
+    upvotes=0;
+  }
+  else{
+    upvotes=upvotes+1
+  }
+  question.query('UPDATE ans3table SET upvotes=$1 where ansno=$2',[upvotes,req.query.ansno],(err,result)=>{
+    if(err) throw err;
+    res.send('Upvoted')
+  });
+});
+app.get('/downvoteReply',(req,res)=>{
+  var downvotes=req.query.downvotes;
+  if (downvotes==null){
+    downvotes=0;
+  }
+  else{
+    downvotes=downvotes+1
+  }
+  question.query('UPDATE ans3table SET downvotes=$1 where ansno=$2',[downvotes,req.query.ansno],(err,result)=>{
+    if(err) throw err;
+    res.send('Downvoted')
+  });
+});
 app.post('/reply2',(req,res)=>{
   var replystring= req.body.replyf;
   var qno= req.body.questno;
@@ -175,8 +200,7 @@ app.get('/allqts',(req,res)=>{
  app.get('/listans',(req,res,err)=>{
 
           var askno=[req.query.quno];
-       
-        question.query('select * from ans3table where qno= $1',askno,(err,result)=>{
+           question.query('select * from ans3table where qno= $1',askno,(err,result)=>{
            if(err) throw err;
            // res.render('./general_forum.hbs',{quest: rows.questions});
         
