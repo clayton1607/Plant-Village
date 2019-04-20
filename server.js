@@ -128,11 +128,7 @@ app.post("/askqts",(req, res) => {
       if(err) throw err;
       question.query('select qno from q2table where questions= $1',q,(err,result)=>{
         if(err) throw err;
-        var values2 = [result.rows[0].qno,"This Discussion is ready","Admin","default"];
-        question.query('insert into ans3table (qno,answer,usera,type) values ($1,$2,$3,$4)',values2,(err,rows)=>{
-          if(err) throw err;
-          res.send('question is added');
-        });
+        res.send('question is added');
       }); 
     });
   });
@@ -147,10 +143,7 @@ app.post('/reply2',(req,res)=>{
 
   var values = [qno,replystring,name,type];
   question.query('insert into ans3table (qno,answer,usera,type) values ($1,$2,$3,$4) RETURNING *',values,(err,rows)=>{
-     if(err) throw err;
-        
-        
-
+     if(err) throw err; 
         res.send('new reply added to qno 1');
      });
 
