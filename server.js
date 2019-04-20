@@ -232,7 +232,10 @@ app.post('/upload',upload.single('file') , (req , res) =>{
         imgur.uploadFile(req.file.path)
         .then(function (json) {
             console.log(json.data);
-            res.send(json)
+            var link={
+              link:json.data.link
+            }
+            res.send(link);
         })
         .catch(function (err) {
             console.error(err.message);
