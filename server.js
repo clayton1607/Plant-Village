@@ -156,7 +156,28 @@ app.post('/reply2',(req,res)=>{
 
 
  });
-
+app.get('/allqts',(req,res)=>{
+  var stmt = 'SELECT * from q2table'
+  question.query(stmt,(err,result)=>{
+    var count;
+    var list1=[];
+    var lengthr=result.rows.length;
+          //  console.log(lengthr+"length");
+    for(count=0;count<lengthr;count++){
+    var ask = {
+                'qno':result.rows[count].qno,
+                'questions':result.rows[count].questions,
+                'quser':result.rows[count].quser,
+                'type':result.rows[count].type,
+                'image_path':result.rows[count].image_path         
+              }
+        
+                    list1.push(ask);
+                      // console.log(list1);
+    }
+    res.send(list1)
+  });
+});
 // route for getting answers of a particular question using its question id
  app.get('/listans',(req,res,err)=>{
 
