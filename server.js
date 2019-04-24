@@ -123,8 +123,8 @@ app.post("/askqts",(req, res) => {
           //id of the question will be on auto increment in database
     var targetPath = req.body.image_path;
     var q = [questionp] //for second query
-    var values1 = [questionp,name,type,targetPath];    
-    question.query('insert into q2table (questions,quser,type,image_path) values ($1,$2,$3,$4)',values1,(err,row)=>{
+    var values1 = [questionp,name,type,targetPath,req.body.location];    
+    question.query('insert into q2table (questions,quser,type,image_path,location) values ($1,$2,$3,$4,$5)',values1,(err,row)=>{
       if(err) throw err;
       question.query('select qno from q2table where questions= $1',q,(err,result)=>{
         if(err) throw err;
@@ -187,7 +187,8 @@ app.get('/allqts',(req,res)=>{
                 'questions':result.rows[count].questions,
                 'quser':result.rows[count].quser,
                 'type':result.rows[count].type,
-                'image_path':result.rows[count].image_path         
+                'image_path':result.rows[count].image_path,
+                'location': result.rows[count].location   
               }
         
                     list1.push(ask);
